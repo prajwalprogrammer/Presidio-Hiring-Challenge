@@ -2,11 +2,12 @@ import User from '../models/user.model.js';
 import bcryptjs from 'bcryptjs';
 import { errorHandler } from '../utils/error.js';
 import jwt from 'jsonwebtoken';
+import nodemailer from 'nodemailer';
 
 export const signup = async (req, res, next) => {
-  const { username, email, password } = req.body;
+  const { firstname, lastname, phone,usertype, email, password } = req.body;
   const hashedPassword = bcryptjs.hashSync(password, 10);
-  const newUser = new User({ username, email, password: hashedPassword });
+  const newUser = new User({ firstname, lastname, phone, usertype, email, password: hashedPassword });
   try {
     await newUser.save();
     res.status(201).json('User created successfully!');
@@ -22,7 +23,7 @@ export const signin = async (req, res, next) => {
     if (!validUser) return next(errorHandler(404, 'User not found!'));
     const validPassword = bcryptjs.compareSync(password, validUser.password);
     if (!validPassword) return next(errorHandler(401, 'Wrong credentials!'));
-    const token = jwt.sign({ id: validUser._id }, process.env.JWT_SECRET);
+    const token = jwt.sign({ id: validUser._id }, 'achwale1234567890prajwal');
     const { password: pass, ...rest } = validUser._doc;
     res
       .cookie('access_token', token, { httpOnly: true })
@@ -37,7 +38,7 @@ export const google = async (req, res, next) => {
   try {
     const user = await User.findOne({ email: req.body.email });
     if (user) {
-      const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
+      const token = jwt.sign({ id: user._id }, 'achwale1234567890prajwal');
       const { password: pass, ...rest } = user._doc;
       res
         .cookie('access_token', token, { httpOnly: true })
@@ -57,7 +58,7 @@ export const google = async (req, res, next) => {
         avatar: req.body.photo,
       });
       await newUser.save();
-      const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET);
+      const token = jwt.sign({ id: newUser._id }, 'achwale1234567890prajwal');
       const { password: pass, ...rest } = newUser._doc;
       res
         .cookie('access_token', token, { httpOnly: true })
@@ -76,4 +77,35 @@ export const signOut = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
+};
+
+
+
+export const sendmail =  (req, res) => {
+  const { to, subject, text } = req.body;
+
+  // Create a transporter
+  let transporter = nodemailer.createTransport({
+    service: 'Gmail', // Use your email service provider
+    auth: {
+      user: 'pnachwale@gmail.com', // Your email
+      pass: 'Prajwal@@12', // Your email password
+    },
+  });
+
+  // Setup email data
+  let mailOptions = {
+    from: 'pnachwale@gmail.com', // Sender address
+    to: 'prajwalachwale29@gmail.com', // List of receivers
+    subject: "subject", // Subject line
+    text: "text", // Plain text body
+  };
+
+  // Send email
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      return res.status(500).send(error.toString());
+    }
+    res.status(200).send('Email sent: ' + info.response);
+  });
 };

@@ -4,6 +4,8 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import SwiperCore from 'swiper';
 import { useSelector } from 'react-redux';
 import { Navigation } from 'swiper/modules';
+import { useNavigate, Link } from 'react-router-dom';
+
 import 'swiper/css/bundle';
 import {
   FaBath,
@@ -13,13 +15,20 @@ import {
   FaMapMarkerAlt,
   FaParking,
   FaShare,
+  FaHospitalAlt,
+  FaSchool,
+  FaHeart
 } from 'react-icons/fa';
 import Contact from '../components/Contact';
 
 // https://sabe.io/blog/javascript-format-numbers-commas#:~:text=The%20best%20way%20to%20format,format%20the%20number%20with%20commas.
 
 export default function Listing() {
+  const navigate = useNavigate();
+
   SwiperCore.use([Navigation]);
+  const [formData, setFormData] = useState({});
+
   const [listing, setListing] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
@@ -50,6 +59,58 @@ export default function Listing() {
     fetchListing();
   }, [params.listingId]);
 
+  const Liked = async() => {
+    const Likeitems = JSON.parse(await localStorage.getItem(currentUser._id));
+
+    if(Likeitems)
+      {
+        const newLike = [...Likeitems,params.listingId]
+        await localStorage.setItem(currentUser._id, JSON.stringify(newLike));
+      }else{
+        await localStorage.setItem(currentUser._id, JSON.stringify(params.listingId));
+      }
+      console.log(Likeitems)
+  }
+  const handleListingDelete = async () => {
+    try {
+      const res = await fetch(`/api/listing/delete/${params.listingId}`, {
+        method: 'DELETE',
+      });
+      const data = await res.json();
+      if (data.success === false) {
+        console.log(data.message);
+        return;
+      }
+
+      navigate(`/`);
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+
+  const handleMail = async() => {
+
+      if(!currentUser)
+        {
+          navigate('/sign-in')
+        }else{
+          setContact(true);
+        }
+    // try {
+
+    //   const res = await fetch('/api/auth/mail', {
+    //     method: 'POST',
+    //     headers: {
+    //       'Content-Type': 'application/json',
+    //     },
+    //       body: JSON.stringify(formData),
+    //   });
+    //   const data = await res.json();
+    //   console.log(data);
+    // } catch (error) {
+    //   console.log(error)
+    // }
+  }
   return (
     <main>
       {loading && <p className='text-center my-7 text-2xl'>Loading...</p>}
@@ -81,6 +142,12 @@ export default function Listing() {
                   setCopied(false);
                 }, 2000);
               }}
+            />
+          </div>
+          <div className='fixed top-[13%] right-[7%] z-10 border rounded-full w-12 h-12 flex justify-center items-center bg-slate-100 cursor-pointer'>
+            <FaHeart
+              className='text-slate-500'
+              onClick={() => {Liked()}}
             />
           </div>
           {copied && (
@@ -128,6 +195,18 @@ export default function Listing() {
                   : `${listing.bathrooms} bath `}
               </li>
               <li className='flex items-center gap-1 whitespace-nowrap '>
+                <FaHospitalAlt className='text-lg' />
+                {listing.hospitals > 1
+                  ? `${listing.hospitals} Hospitals `
+                  : `${listing.hospitals} Hospital `}
+              </li>
+              <li className='flex items-center gap-1 whitespace-nowrap '>
+                <FaSchool className='text-lg' />
+                {listing.colleges > 1
+                  ? `${listing.colleges} Colleges `
+                  : `${listing.colleges} College `}
+              </li>
+              <li className='flex items-center gap-1 whitespace-nowrap '>
                 <FaParking className='text-lg' />
                 {listing.parking ? 'Parking spot' : 'No Parking'}
               </li>
@@ -136,12 +215,30 @@ export default function Listing() {
                 {listing.furnished ? 'Furnished' : 'Unfurnished'}
               </li>
             </ul>
-            {currentUser && listing.userRef !== currentUser._id && !contact && (
+            {(!currentUser || (currentUser && listing.userRef !== currentUser._id && !contact)) && (
               <button
-                onClick={() => setContact(true)}
+                onClick={() => handleMail()}
                 className='bg-slate-700 text-white rounded-lg uppercase hover:opacity-95 p-3'
               >
-                Contact landlord
+                I'm Interested
+              </button>
+            )}
+            {currentUser && listing.userRef === currentUser._id && !contact && (
+              <Link to={`/update-listing/${params.listingId}`} className='bg-slate-700  text-white rounded-lg uppercase hover:opacity-95 p-3'>
+                <button
+                  // onClick={() => setContact(true)}
+                  className='items-center justify-center w-full'
+                >
+                  EDIT PROPERTY
+                </button>
+              </Link>
+            )}
+            {currentUser && listing.userRef === currentUser._id && !contact && (
+              <button
+                onClick={() => handleListingDelete()}
+                className='bg-green-700 text-white rounded-lg uppercase hover:opacity-95 p-3'
+              >
+                Delete Property
               </button>
             )}
             {contact && <Contact listing={listing} />}

@@ -30,6 +30,14 @@ const listingSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    hospitals: {
+      type: Number,
+      required: true,
+    },
+    colleges: {
+      type: Number,
+      required: true,
+    },
     furnished: {
       type: Boolean,
       required: true,

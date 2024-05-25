@@ -7,9 +7,9 @@ import listingRouter from './routes/listing.route.js';
 import cookieParser from 'cookie-parser';
 import path from 'path';
 dotenv.config();
-
+console.log(process.env.MONGO)
 mongoose
-  .connect(process.env.MONGO)
+  .connect("mongodb+srv://prajwalachwale29:prajwalachwale29@cluster0.y4gz1db.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
   .then(() => {
     console.log('Connected to MongoDB!');
   })

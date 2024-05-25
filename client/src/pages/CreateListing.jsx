@@ -21,6 +21,8 @@ export default function CreateListing() {
     type: 'rent',
     bedrooms: 1,
     bathrooms: 1,
+    hospitals: 0,
+    colleges: 0,
     regularPrice: 50,
     discountPrice: 0,
     offer: false,
@@ -267,6 +269,32 @@ export default function CreateListing() {
                 value={formData.bathrooms}
               />
               <p>Baths</p>
+            </div>
+            <div className='flex items-center gap-2'>
+              <input
+                type='number'
+                id='hospitals'
+                min='1'
+                max='10'
+                required
+                className='p-3 border border-gray-300 rounded-lg'
+                onChange={handleChange}
+                value={formData.hospitals}
+              />
+              <p>Hospitals</p>
+            </div>
+            <div className='flex items-center gap-2'>
+              <input
+                type='number'
+                id='colleges'
+                min='1'
+                max='10'
+                required
+                className='p-3 border border-gray-300 rounded-lg'
+                onChange={handleChange}
+                value={formData.colleges}
+              />
+              <p>Colleges</p>
             </div>
             <div className='flex items-center gap-2'>
               <input

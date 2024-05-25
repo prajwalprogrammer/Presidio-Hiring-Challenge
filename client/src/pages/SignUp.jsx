@@ -14,6 +14,7 @@ export default function SignUp() {
     });
   };
   const handleSubmit = async (e) => {
+    console.log(formData)
     e.preventDefault();
     try {
       setLoading(true);
@@ -45,11 +46,29 @@ export default function SignUp() {
       <form onSubmit={handleSubmit} className='flex flex-col gap-4'>
         <input
           type='text'
-          placeholder='username'
+          placeholder='First Name'
           className='border p-3 rounded-lg'
-          id='username'
+          id='firstname'
           onChange={handleChange}
         />
+        <input
+          type='text'
+          placeholder='Last Name'
+          className='border p-3 rounded-lg'
+          id='lastname'
+          onChange={handleChange}
+        />
+        <input
+          type='number'
+          placeholder='Phone Number'
+          className='border p-3 rounded-lg'
+          id='phone'
+          onChange={handleChange}
+        />
+        <select id="usertype" className='border p-3 rounded-lg' onChange={handleChange}>
+          <option value="buyer" className='border p-3 rounded-lg'>Buyer</option>
+          <option value="seller" className='border p-3 rounded-lg'>Seller</option>
+        </select>
         <input
           type='email'
           placeholder='email'
@@ -71,7 +90,7 @@ export default function SignUp() {
         >
           {loading ? 'Loading...' : 'Sign Up'}
         </button>
-        <OAuth/>
+        {/* <OAuth /> */}
       </form>
       <div className='flex gap-2 mt-5'>
         <p>Have an account?</p>

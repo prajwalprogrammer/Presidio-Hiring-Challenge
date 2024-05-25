@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ListingItem from '../components/ListingItem';
-
+import Pagination from '../components/pagination/pagination';
+let pageSize = 3;
 export default function Search() {
   const navigate = useNavigate();
   const [sidebardata, setSidebardata] = useState({
@@ -10,6 +11,8 @@ export default function Search() {
     parking: false,
     furnished: false,
     offer: false,
+    hospitals: false,
+    colleges: false,
     sort: 'created_at',
     order: 'desc',
   });
@@ -17,6 +20,7 @@ export default function Search() {
   const [loading, setLoading] = useState(false);
   const [listings, setListings] = useState([]);
   const [showMore, setShowMore] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     const urlParams = new URLSearchParams(location.search);
@@ -24,6 +28,8 @@ export default function Search() {
     const typeFromUrl = urlParams.get('type');
     const parkingFromUrl = urlParams.get('parking');
     const furnishedFromUrl = urlParams.get('furnished');
+    const hospitalsFromUrl = urlParams.get('hospitals');
+    const collegesFromUrl = urlParams.get('colleges');
     const offerFromUrl = urlParams.get('offer');
     const sortFromUrl = urlParams.get('sort');
     const orderFromUrl = urlParams.get('order');
@@ -35,13 +41,17 @@ export default function Search() {
       furnishedFromUrl ||
       offerFromUrl ||
       sortFromUrl ||
-      orderFromUrl
+      orderFromUrl ||
+      hospitalsFromUrl ||
+      collegesFromUrl
     ) {
       setSidebardata({
         searchTerm: searchTermFromUrl || '',
         type: typeFromUrl || 'all',
         parking: parkingFromUrl === 'true' ? true : false,
         furnished: furnishedFromUrl === 'true' ? true : false,
+        hospitals: hospitalsFromUrl === 'true' ? true : false,
+        colleges: collegesFromUrl === 'true' ? true : false,
         offer: offerFromUrl === 'true' ? true : false,
         sort: sortFromUrl || 'created_at',
         order: orderFromUrl || 'desc',
@@ -82,7 +92,9 @@ export default function Search() {
     if (
       e.target.id === 'parking' ||
       e.target.id === 'furnished' ||
-      e.target.id === 'offer'
+      e.target.id === 'offer' ||
+      e.target.id === 'hospitals' ||
+      e.target.id === 'colleges'
     ) {
       setSidebardata({
         ...sidebardata,
@@ -110,10 +122,17 @@ export default function Search() {
     urlParams.set('offer', sidebardata.offer);
     urlParams.set('sort', sidebardata.sort);
     urlParams.set('order', sidebardata.order);
+    urlParams.set('hospitals', sidebardata.hospitals);
+    urlParams.set('colleges', sidebardata.colleges);
     const searchQuery = urlParams.toString();
     navigate(`/search?${searchQuery}`);
   };
 
+  const currentTableData = useMemo(() => {
+    const firstPageIndex = (currentPage - 1) * pageSize;
+    const lastPageIndex = firstPageIndex + pageSize;
+    return listings.slice(firstPageIndex, lastPageIndex);
+  }, [currentPage,listings]);
   const onShowMoreClick = async () => {
     const numberOfListings = listings.length;
     const startIndex = numberOfListings;
@@ -187,8 +206,8 @@ export default function Search() {
               <span>Offer</span>
             </div>
           </div>
+          <label className='font-semibold'>Amenities:</label>
           <div className='flex gap-2 flex-wrap items-center'>
-            <label className='font-semibold'>Amenities:</label>
             <div className='flex gap-2'>
               <input
                 type='checkbox'
@@ -208,6 +227,26 @@ export default function Search() {
                 checked={sidebardata.furnished}
               />
               <span>Furnished</span>
+            </div>
+            <div className='flex gap-2'>
+              <input
+                type='checkbox'
+                id='hospitals'
+                className='w-5'
+                onChange={handleChange}
+                checked={sidebardata.hospitals}
+              />
+              <span>Hospital</span>
+            </div>
+            <div className='flex gap-2'>
+              <input
+                type='checkbox'
+                id='colleges'
+                className='w-5'
+                onChange={handleChange}
+                checked={sidebardata.colleges}
+              />
+              <span>College</span>
             </div>
           </div>
           <div className='flex items-center gap-2'>
@@ -245,18 +284,29 @@ export default function Search() {
 
           {!loading &&
             listings &&
-            listings.map((listing) => (
+            currentTableData.map((listing) => (
               <ListingItem key={listing._id} listing={listing} />
             ))}
 
-          {showMore && (
+          {/* {showMore && (
             <button
               onClick={onShowMoreClick}
               className='text-green-700 hover:underline p-7 text-center w-full'
             >
               Show more
             </button>
-          )}
+          )} */}
+          {
+            !loading &&
+            listings &&
+            <Pagination
+              className="pagination-bar"
+              currentPage={currentPage}
+              totalCount={listings.length}
+              pageSize={pageSize}
+              onPageChange={page => setCurrentPage(page)}
+            />
+          }
         </div>
       </div>
     </div>
