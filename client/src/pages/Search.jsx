@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ListingItem from '../components/ListingItem';
-import Pagination from '../components/pagination/pagination';
+import Pagination from '../components/pagination/Pagination';
 let pageSize = 3;
 export default function Search() {
   const navigate = useNavigate();
